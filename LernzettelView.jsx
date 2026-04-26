@@ -1,5 +1,6 @@
 // src/components/LernzettelView.jsx
 // Lern-Psychologie-Style: ein Topic = ein Chunk. Ruhig, hoher Kontrast, klare Hierarchie.
+// recall-Mode kommt von App (FAB in Bottom-Nav).
 
 import React, { useState, useMemo } from "react";
 
@@ -26,10 +27,9 @@ function renderInline(text) {
   return parts;
 }
 
-export default function LernzettelView({ topics, categories }) {
+export default function LernzettelView({ topics, categories, recall }) {
   const [filter, setFilter] = useState("Alle");
   const [search, setSearch] = useState("");
-  const [recall, setRecall] = useState(false);
 
   const cats = ["Alle", ...categories];
 
@@ -75,15 +75,6 @@ export default function LernzettelView({ topics, categories }) {
             </button>
           ))}
         </div>
-
-        <button
-          onClick={() => setRecall((r) => !r)}
-          className={`w-full rounded-full text-[13px] font-semibold py-2.5 px-4 active:scale-[0.98] transition ${
-            recall ? "bg-emerald-600 text-white" : "bg-zinc-900 text-zinc-300"
-          }`}
-        >
-          {recall ? "Karteikarten-Modus aktiv · Antworten verdeckt" : "Karteikarten-Modus starten"}
-        </button>
       </div>
 
       <div className="space-y-2">
