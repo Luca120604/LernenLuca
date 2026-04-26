@@ -1,23 +1,27 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="de" class="dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta name="theme-color" content="#0f172a">
+<meta name="theme-color" content="#09090b">
 <title>LernenLuca — BFK 1 & HUM Info</title>
 <script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config = { darkMode: "class" };</script>
 <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
 <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
 <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 <style>
+  html { color-scheme: dark; }
   body { -webkit-tap-highlight-color: transparent; overscroll-behavior-y: none; }
   details > summary { list-style: none; cursor: pointer; }
   details > summary::-webkit-details-marker { display: none; }
   details[open] > summary .chev { transform: rotate(90deg); }
   .chev { transition: transform .15s ease; }
+  ::-webkit-scrollbar { display: none; }
+  * { scrollbar-width: none; }
 </style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen antialiased">
+<body class="bg-zinc-950 text-zinc-50 min-h-screen antialiased">
 <div id="root"></div>
 
 <script type="text/babel">
@@ -1226,12 +1230,12 @@ const SUBJECTS = {
   humInfo: { name: "HUM Info", teacher: "Frau HOL", topics: HUMINFO_TOPICS, categories: ["Hints", "Grundlagen", "Kreditarten", "Kreditprüfung", "Recht", "Bilanz", "Kennziffern", "Rechnen", "Sicherheiten", "Überwachung", "Checkliste"] },
 };
 
-const COLOR_MAP = {
-  blue:   { bg: "bg-blue-500/10",    border: "border-blue-500",    text: "text-blue-300",    badge: "bg-blue-500"    },
-  green:  { bg: "bg-emerald-500/10", border: "border-emerald-500", text: "text-emerald-300", badge: "bg-emerald-500" },
-  red:    { bg: "bg-red-500/10",     border: "border-red-500",     text: "text-red-300",     badge: "bg-red-500"     },
-  amber:  { bg: "bg-amber-500/10",   border: "border-amber-500",   text: "text-amber-300",   badge: "bg-amber-500"   },
-  purple: { bg: "bg-purple-500/10",  border: "border-purple-500",  text: "text-purple-300",  badge: "bg-purple-500"  },
+const ACCENT = {
+  blue:   "bg-blue-400",
+  green:  "bg-emerald-400",
+  red:    "bg-red-400",
+  amber:  "bg-amber-400",
+  purple: "bg-purple-400",
 };
 
 function renderInline(text) {
@@ -1241,17 +1245,35 @@ function renderInline(text) {
   let m;
   while ((m = re.exec(text)) !== null) {
     if (m.index > last) parts.push(text.slice(last, m.index));
-    if (m[1]) parts.push(<strong key={m.index} className="text-white font-bold">{m[1]}</strong>);
-    else if (m[2]) parts.push(<em key={m.index} className="text-slate-400 not-italic">{m[2]}</em>);
+    if (m[1]) parts.push(<strong key={m.index} className="text-white font-semibold">{m[1]}</strong>);
+    else if (m[2]) parts.push(<em key={m.index} className="text-zinc-400 not-italic">{m[2]}</em>);
     last = m.index + m[0].length;
   }
   if (last < text.length) parts.push(text.slice(last));
   return parts;
 }
 
+function RecallItem({ item, recall }) {
+  const [revealed, setRevealed] = useState(false);
+  const showAnswer = !recall || revealed;
+  return (
+    <li className="bg-zinc-900 px-3.5 py-3">
+      <div className="text-[14px] font-semibold text-white mb-1 leading-snug">{renderInline(item.t)}</div>
+      {showAnswer ? (
+        <div className="text-[14px] text-zinc-300 leading-relaxed">{renderInline(item.d)}</div>
+      ) : (
+        <button onClick={() => setRevealed(true)} className="text-[12px] uppercase tracking-wider text-zinc-500 active:text-zinc-300">
+          Antwort einblenden
+        </button>
+      )}
+    </li>
+  );
+}
+
 function LernzettelView({ topics, categories }) {
   const [filter, setFilter] = useState("Alle");
   const [search, setSearch] = useState("");
+  const [recall, setRecall] = useState(false);
   const cats = ["Alle", ...categories];
 
   const filtered = useMemo(() => {
@@ -1265,47 +1287,57 @@ function LernzettelView({ topics, categories }) {
 
   return (
     <div>
-      <div className="px-4 pt-2 pb-3 border-b border-slate-800">
+      <div className="space-y-3 mb-5">
         <input type="text" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Suche…"
-          className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm placeholder-slate-500 focus:outline-none focus:border-amber-500" />
-        <div className="flex gap-2 mt-2 overflow-x-auto pb-1">
+          className="w-full bg-zinc-900 rounded-xl px-3.5 py-2.5 text-[14px] placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-700"
+          style={{ minHeight: "44px" }} />
+        <div className="flex gap-2 -mx-4 px-4 overflow-x-auto">
           {cats.map((c) => (
             <button key={c} onClick={() => setFilter(c)}
-              className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition ${
-                filter === c ? "bg-amber-500 text-slate-950" : "bg-slate-800 text-slate-300 hover:bg-slate-700"
+              className={`px-3 py-1.5 rounded-full text-[12px] font-semibold whitespace-nowrap active:scale-[0.98] transition ${
+                filter === c ? "bg-white text-zinc-950" : "bg-zinc-900 text-zinc-300"
               }`}>
               {c}
             </button>
           ))}
         </div>
+        <button onClick={() => setRecall((r) => !r)}
+          className={`w-full rounded-full text-[13px] font-semibold py-2.5 px-4 active:scale-[0.98] transition ${
+            recall ? "bg-emerald-600 text-white" : "bg-zinc-900 text-zinc-300"
+          }`}>
+          {recall ? "Karteikarten-Modus aktiv · Antworten verdeckt" : "Karteikarten-Modus starten"}
+        </button>
       </div>
 
-      <div className="p-4 space-y-3">
-        {filtered.length === 0 && (<div className="text-center py-12 text-slate-500 text-sm">Nichts gefunden.</div>)}
+      <div className="space-y-2">
+        {filtered.length === 0 && (
+          <div className="text-center py-16">
+            <p className="text-[14px] text-zinc-300 mb-1">Nichts gefunden.</p>
+            <p className="text-[12px] text-zinc-500">Anderes Stichwort versuchen.</p>
+          </div>
+        )}
         {filtered.map((topic) => {
-          const c = COLOR_MAP[topic.color] || COLOR_MAP.blue;
+          const accent = ACCENT[topic.color] || ACCENT.blue;
           return (
-            <details key={topic.id} className={`rounded-xl border ${c.border} ${c.bg} overflow-hidden`}>
-              <summary className="px-4 py-3 flex items-center justify-between gap-3 active:bg-slate-800/50">
-                <div className="flex items-center gap-3 min-w-0">
-                  <span className={`${c.badge} text-slate-950 text-[10px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider whitespace-nowrap`}>{topic.cat}</span>
-                  <h2 className="font-bold text-sm truncate">{topic.title}</h2>
+            <details key={topic.id} className="rounded-xl bg-zinc-900 overflow-hidden">
+              <summary className="px-4 py-3.5 flex items-center gap-3 active:bg-zinc-800/60">
+                <span className={`${accent} w-1 h-10 rounded-full shrink-0`} />
+                <div className="flex-1 min-w-0">
+                  <p className="text-[10px] uppercase tracking-wider text-zinc-500 mb-0.5">{topic.cat}</p>
+                  <h2 className="text-[15px] font-semibold tracking-tight truncate">{topic.title}</h2>
                 </div>
-                <span className={`chev ${c.text} text-lg leading-none`}>›</span>
+                <span className="chev text-zinc-500 text-lg leading-none shrink-0">›</span>
               </summary>
-              <div className="px-4 pb-4 space-y-4 border-t border-slate-800/50 pt-3">
+              <div className="px-4 pb-4 pt-1 space-y-5">
                 {topic.sections.map((sec, i) => (
-                  <div key={i}>
-                    <h3 className={`text-xs font-bold uppercase tracking-wider mb-2 ${c.text}`}>{sec.h}</h3>
-                    <ul className="space-y-2">
+                  <section key={i}>
+                    <h3 className="text-[10px] font-semibold uppercase tracking-wider text-zinc-400 mb-2">{sec.h}</h3>
+                    <ul className="space-y-px rounded-xl bg-zinc-950 overflow-hidden">
                       {sec.items.map((item, j) => (
-                        <li key={j} className="bg-slate-900/60 rounded-lg p-3 border border-slate-800">
-                          <div className="text-[13px] font-bold text-white mb-1">{renderInline(item.t)}</div>
-                          <div className="text-[12.5px] text-slate-300 leading-relaxed">{renderInline(item.d)}</div>
-                        </li>
+                        <RecallItem key={j} item={item} recall={recall} />
                       ))}
                     </ul>
-                  </div>
+                  </section>
                 ))}
               </div>
             </details>
@@ -1316,39 +1348,49 @@ function LernzettelView({ topics, categories }) {
   );
 }
 
+function BottomNav({ active, onChange }) {
+  const keys = Object.keys(SUBJECTS);
+  return (
+    <nav className="fixed bottom-0 inset-x-0 z-20 bg-zinc-950/95 backdrop-blur border-t border-zinc-900"
+      style={{ paddingBottom: "env(safe-area-inset-bottom)" }}>
+      <div className="max-w-3xl mx-auto px-4 py-2 flex items-center justify-around gap-2">
+        {keys.map((key) => {
+          const s = SUBJECTS[key];
+          const isActive = active === key;
+          return (
+            <button key={key} onClick={() => onChange(key)}
+              className={`flex-1 flex flex-col items-center justify-center rounded-xl py-2 px-3 active:scale-[0.98] transition ${
+                isActive ? "bg-white text-zinc-950" : "text-zinc-400"
+              }`}
+              style={{ minHeight: "48px" }}>
+              <span className="text-[13px] font-semibold leading-tight">{s.name}</span>
+              <span className="text-[10px] uppercase tracking-wider opacity-70 leading-tight mt-0.5">{s.teacher}</span>
+            </button>
+          );
+        })}
+      </div>
+    </nav>
+  );
+}
+
 function App() {
   const [active, setActive] = useState("bfk1");
   const subject = SUBJECTS[active];
 
   return (
-    <div className="max-w-2xl mx-auto pb-24">
-      <header className="sticky top-0 z-10 bg-slate-950/95 backdrop-blur border-b border-slate-800 px-4 pt-3">
-        <div className="flex items-center justify-between mb-3">
-          <div>
-            <h1 className="text-xl font-black tracking-tight">LernenLuca</h1>
-            <p className="text-[11px] text-slate-400 uppercase tracking-wider">{subject.name} · {subject.teacher}</p>
-          </div>
-          <span className="bg-amber-500 text-slate-950 text-[10px] font-bold px-2 py-1 rounded">v2.0</span>
-        </div>
-        <div className="flex gap-1 -mx-4 px-4">
-          {Object.entries(SUBJECTS).map(([key, s]) => (
-            <button key={key} onClick={() => setActive(key)}
-              className={`flex-1 px-3 py-2 text-sm font-semibold rounded-t-lg transition ${
-                active === key ? "bg-slate-900 text-white border-b-2 border-amber-500" : "text-slate-400 hover:text-slate-200"
-              }`}>
-              {s.name}<span className="block text-[10px] font-normal opacity-70">{s.teacher}</span>
-            </button>
-          ))}
-        </div>
-      </header>
-
-      <main>
-        <LernzettelView key={active} topics={subject.topics} categories={subject.categories} />
-      </main>
-
-      <footer className="px-4 mt-4 text-center text-[11px] text-slate-600">
-        LernenLuca · Bankkaufmann
-      </footer>
+    <div className="min-h-screen bg-zinc-950 text-zinc-50">
+      <div className="max-w-3xl mx-auto px-4"
+        style={{ paddingTop: "calc(16px + env(safe-area-inset-top))", paddingBottom: "calc(96px + env(safe-area-inset-bottom))" }}>
+        <header className="mb-5">
+          <p className="text-[10px] uppercase tracking-wider text-zinc-500 mb-1">Lernzettel</p>
+          <h1 className="text-[22px] font-bold tracking-tight">LernenLuca</h1>
+          <p className="text-[12px] text-zinc-500 mt-0.5">{subject.name} · {subject.teacher} · {subject.topics.length} Themen</p>
+        </header>
+        <main>
+          <LernzettelView key={active} topics={subject.topics} categories={subject.categories} />
+        </main>
+      </div>
+      <BottomNav active={active} onChange={setActive} />
     </div>
   );
 }

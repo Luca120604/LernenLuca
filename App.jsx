@@ -1,7 +1,7 @@
 // src/App.jsx
-// LernenLuca — Hauptkomponente mit Tab-Switcher zwischen BFK1 und HUM Info
+// LernenLuca — Hauptkomponente. Lern-Psychologie-Style: ruhig, dunkel, fokussiert.
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import LernzettelView from "./components/LernzettelView";
 import { BFK1_TOPICS } from "./data/bfk1";
 import { HUMINFO_TOPICS } from "./data/humInfo";
@@ -25,42 +25,27 @@ export default function App() {
   const [active, setActive] = useState("bfk1");
   const subject = SUBJECTS[active];
 
-  return (
-    <div className="bg-slate-950 text-slate-100 min-h-screen antialiased">
-      <div className="max-w-2xl mx-auto pb-24">
-        {/* Header */}
-        <header className="sticky top-0 z-10 bg-slate-950/95 backdrop-blur border-b border-slate-800 px-4 pt-3">
-          <div className="flex items-center justify-between mb-3">
-            <div>
-              <h1 className="text-xl font-black tracking-tight">LernenLuca</h1>
-              <p className="text-[11px] text-slate-400 uppercase tracking-wider">
-                {subject.name} · {subject.teacher}
-              </p>
-            </div>
-            <span className="bg-amber-500 text-slate-950 text-[10px] font-bold px-2 py-1 rounded">
-              v1.0
-            </span>
-          </div>
+  useEffect(() => {
+    document.documentElement.classList.add("dark");
+  }, []);
 
-          {/* Subject Tabs */}
-          <div className="flex gap-1 -mx-4 px-4">
-            {Object.entries(SUBJECTS).map(([key, s]) => (
-              <button
-                key={key}
-                onClick={() => setActive(key)}
-                className={`flex-1 px-3 py-2 text-sm font-semibold rounded-t-lg transition ${
-                  active === key
-                    ? "bg-slate-900 text-white border-b-2 border-amber-500"
-                    : "text-slate-400 hover:text-slate-200"
-                }`}
-              >
-                {s.name}
-                <span className="block text-[10px] font-normal opacity-70">
-                  {s.teacher}
-                </span>
-              </button>
-            ))}
-          </div>
+  return (
+    <div className="min-h-screen bg-zinc-950 text-zinc-50 antialiased">
+      <div
+        className="max-w-3xl mx-auto px-4"
+        style={{
+          paddingTop: "calc(16px + env(safe-area-inset-top))",
+          paddingBottom: "calc(96px + env(safe-area-inset-bottom))",
+        }}
+      >
+        <header className="mb-5">
+          <p className="text-[10px] uppercase tracking-wider text-zinc-500 mb-1">
+            Lernzettel
+          </p>
+          <h1 className="text-[22px] font-bold tracking-tight">LernenLuca</h1>
+          <p className="text-[12px] text-zinc-500 mt-0.5">
+            {subject.name} · {subject.teacher} · {subject.topics.length} Themen
+          </p>
         </header>
 
         <main>
@@ -70,11 +55,41 @@ export default function App() {
             categories={subject.categories}
           />
         </main>
-
-        <footer className="px-4 mt-4 text-center text-[11px] text-slate-600">
-          LernenLuca · Bankkaufmann · {new Date().toLocaleDateString("de-DE")}
-        </footer>
       </div>
+
+      <BottomNav active={active} onChange={setActive} subjects={SUBJECTS} />
     </div>
+  );
+}
+
+function BottomNav({ active, onChange, subjects }) {
+  const keys = Object.keys(subjects);
+  return (
+    <nav
+      className="fixed bottom-0 inset-x-0 z-20 bg-zinc-950/95 backdrop-blur border-t border-zinc-900"
+      style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
+    >
+      <div className="max-w-3xl mx-auto px-4 py-2 flex items-center justify-around gap-2">
+        {keys.map((key) => {
+          const s = subjects[key];
+          const isActive = active === key;
+          return (
+            <button
+              key={key}
+              onClick={() => onChange(key)}
+              className={`flex-1 flex flex-col items-center justify-center rounded-xl py-2 px-3 active:scale-[0.98] transition ${
+                isActive ? "bg-white text-zinc-950" : "text-zinc-400"
+              }`}
+              style={{ minHeight: "48px" }}
+            >
+              <span className="text-[13px] font-semibold leading-tight">{s.name}</span>
+              <span className="text-[10px] uppercase tracking-wider opacity-70 leading-tight mt-0.5">
+                {s.teacher}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+    </nav>
   );
 }

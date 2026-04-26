@@ -3,15 +3,20 @@
 @tailwind utilities;
 
 @layer base {
+  html {
+    color-scheme: dark;
+  }
   html, body {
     -webkit-tap-highlight-color: transparent;
     overscroll-behavior-y: none;
+    background-color: #09090b;
+    color: #fafafa;
   }
-  details > summary::-webkit-details-marker {
-    display: none;
-  }
-  details[open] > summary > span:last-child {
-    transform: rotate(90deg);
-    transition: transform 0.15s ease;
-  }
+  details > summary { list-style: none; cursor: pointer; }
+  details > summary::-webkit-details-marker { display: none; }
+  details[open] > summary .chev { transform: rotate(90deg); }
+  .chev { transition: transform .15s ease; }
+
+  ::-webkit-scrollbar { display: none; }
+  * { scrollbar-width: none; }
 }
