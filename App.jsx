@@ -13,9 +13,9 @@ const SUBJECTS = {
     topics: BFK1_TOPICS,
     categories: ["VWL", "Altersvorsorge", "Versicherung"],
   },
-  humInfo: {
-    name: "HUM Info",
-    teacher: "Frau HOL",
+  bfk2: {
+    name: "BFK 2",
+    teacher: "Holder",
     topics: HUMINFO_TOPICS,
     categories: ["Hints", "Grundlagen", "Kreditarten", "Kreditprüfung", "Recht", "Bilanz", "Kennziffern", "Rechnen", "Sicherheiten", "Überwachung", "Checkliste"],
   },
