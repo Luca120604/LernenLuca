@@ -1,0 +1,1359 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0f172a">
+<title>LernenLuca — BFK 1 & HUM Info</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<style>
+  body { -webkit-tap-highlight-color: transparent; overscroll-behavior-y: none; }
+  details > summary { list-style: none; cursor: pointer; }
+  details > summary::-webkit-details-marker { display: none; }
+  details[open] > summary .chev { transform: rotate(90deg); }
+  .chev { transition: transform .15s ease; }
+</style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen antialiased">
+<div id="root"></div>
+
+<script type="text/babel">
+const { useState, useMemo } = React;
+
+// src/data/bfk1.js
+// BFK 1 — Müller — kompletter Stoff (VWL + Versicherungen)
+
+const BFK1_TOPICS = [
+  // ============= VWL =============
+  {
+    id: "geld",
+    cat: "VWL",
+    title: "Geld — Funktionen & Eigenschaften",
+    color: "blue",
+    sections: [
+      {
+        h: "3 Funktionen von Geld",
+        items: [
+          { t: "Tauschmittel", d: "Der Tausch von Waren und Dienstleistungen wird vereinfacht. *(= ich muss nicht Äpfel gegen Brot tauschen — ich zahle einfach)*" },
+          { t: "Wertaufbewahrungsmittel", d: "Sparen von Geld wird möglich. *(= heute arbeiten, nächsten Monat ausgeben)*" },
+          { t: "Recheneinheit", d: "Über Preise lassen sich ungleiche Güter bewerten. *(= Auto und Brot vergleichbar in €)*" },
+        ],
+      },
+      {
+        h: "4 Geldeigenschaften",
+        items: [
+          { t: "Allgemein anerkannt (begehrt)", d: "Alle akzeptieren es als Zahlungsmittel." },
+          { t: "Wertbeständig (knapp)", d: "Behält Wert über die Zeit. Bei Inflation gestört." },
+          { t: "Handlich (transportierbar)", d: "Münzen/Scheine statt Goldbarren." },
+          { t: "Fälschungssicher", d: "Wasserzeichen, Hologramm." },
+        ],
+      },
+    ],
+  },
+  {
+    id: "inflation-arten",
+    cat: "VWL",
+    title: "Inflation — Arten",
+    color: "red",
+    sections: [
+      {
+        h: "Nach Geschwindigkeit",
+        items: [
+          { t: "Schleichende Inflation", d: "Bis ca. 5%. EZB-Ziel = 2%. DE März 2026 = 2,7%." },
+          { t: "Galoppierende Inflation", d: "~20–100%. Vertrauen sinkt. Flucht in Sachwerte." },
+          { t: "Hyperinflation", d: ">50% pro Monat. Geld wertlos. DE 1923." },
+        ],
+      },
+    ],
+  },
+  {
+    id: "inflation-ursachen",
+    cat: "VWL",
+    title: "Inflation — Ursachen",
+    color: "red",
+    sections: [
+      {
+        h: "4 Hauptursachen",
+        items: [
+          { t: "Nachfrageinflation", d: "Zu viel Nachfrage, zu wenig Angebot. Beispiel: Immobilienboom München." },
+          { t: "Angebotsinflation", d: "Produktionskosten steigen. Beispiel: Gas-Krise 2022." },
+          { t: "Geldmengeninflation", d: "EZB pumpt Geld in Umlauf. Beispiel: Anleihekäufe 2015–2022." },
+          { t: "Importierte Inflation", d: "Preisanstieg aus dem Ausland (Öl, Gas). DE als Importland besonders anfällig." },
+        ],
+      },
+      {
+        h: "Merksatz",
+        items: [
+          { t: "Geldmengen-Phänomen", d: "\"Inflation ist immer auch ein Geldmengenphänomen\" (Friedman). Andere Ursachen sind Auslöser, aber Geldmenge muss mitwachsen." },
+        ],
+      },
+    ],
+  },
+  {
+    id: "inflation-auswirkungen",
+    cat: "VWL",
+    title: "Inflation — Auswirkungen",
+    color: "red",
+    sections: [
+      {
+        h: "Wirkung auf Akteure",
+        items: [
+          { t: "Sparer", d: "Geld verliert Kaufkraft. Negativer Realzins, wenn Zinsen < Inflation." },
+          { t: "Schuldner", d: "Schulden entwerten sich, da Kaufkraft des Rückzahlungsbetrags niedriger. Evtl. Schuldenaufnahme zur Lebensfinanzierung." },
+          { t: "Löhne", d: "3% Lohnerhöhung bei 2,7% Inflation = 0,3% real mehr Kaufkraft." },
+          { t: "Sachwerte", d: "Profitieren. Immobilien, Gold, Grundstücke — knappe reale Güter behalten Wert." },
+          { t: "Staat", d: "Profitiert wie Schuldner. Aber: kalte Progression bei Steuern." },
+        ],
+      },
+      {
+        h: "Merksatz",
+        items: [
+          { t: "Sparer vs. Schuldner", d: "Inflation bestraft Sparer und belohnt Schuldner. Geldwerte verlieren — Sachwerte gewinnen." },
+        ],
+      },
+    ],
+  },
+  {
+    id: "realzins",
+    cat: "VWL",
+    title: "Realzins",
+    color: "amber",
+    sections: [
+      {
+        h: "Formel",
+        items: [
+          { t: "Realzins = Nominalzins − Inflationsrate", d: "Nominalzins = was die Bank auf dem Papier zahlt. Realzins = was real an Kaufkraft übrig bleibt." },
+        ],
+      },
+      {
+        h: "Beispiel",
+        items: [
+          { t: "10.000 € Festgeld @ 2,5%, Inflation 2,7%", d: "Realzins = 2,5 − 2,7 = **−0,2%**. Kunde bekommt 250 € Zinsen, verliert aber real Kaufkraft." },
+        ],
+      },
+    ],
+  },
+  {
+    id: "vpi",
+    cat: "VWL",
+    title: "VPI & Wägungsschema",
+    color: "green",
+    sections: [
+      {
+        h: "Inflation messen",
+        items: [
+          { t: "Verbraucherpreisindex (VPI)", d: "Statistisches Bundesamt vergleicht Warenkorb zwischen 2 Zeitpunkten." },
+          { t: "Inflationsrate", d: "((VPI neu − VPI alt) / VPI alt) × 100" },
+          { t: "Kaufkraftveränderung", d: "((VPI alt − VPI neu) / VPI neu) × 100" },
+        ],
+      },
+      {
+        h: "Wägungsschema (Beispiel 3000 €)",
+        items: [
+          { t: "Anteil pro Kategorie", d: "(Ausgabe / Gesamtausgaben) × 100. z.B. 360/3000 × 100 = 12%." },
+          { t: "Preisindex pro Jahr", d: "Pro Kategorie: (Preis Messjahr / Preis Basisjahr) × Wägungsanteil. Summe = Gesamt-Preisindex." },
+          { t: "Inflationsrate aus Index", d: "((Index neu − Index alt) / Index alt) × 100" },
+        ],
+      },
+      {
+        h: "Lückentext-Logik",
+        items: [
+          { t: "Warenkorb teurer", d: "→ Preisniveau steigt → Kaufkraft sinkt" },
+          { t: "Warenkorb billiger", d: "→ Preisniveau sinkt → Kaufkraft steigt" },
+        ],
+      },
+    ],
+  },
+  {
+    id: "magisches-viereck",
+    cat: "VWL",
+    title: "Magisches Viereck (StabG §1)",
+    color: "purple",
+    sections: [
+      {
+        h: "4 Ziele des Stabilitätsgesetzes (1967)",
+        items: [
+          { t: "Preisniveaustabilität", d: "Inflationsrate ≤ 2%" },
+          { t: "Hoher Beschäftigungsstand", d: "Arbeitslosenquote ≤ 3%" },
+          { t: "Außenwirtschaftliches Gleichgewicht", d: "Export ≈ Import" },
+          { t: "Angemessenes Wirtschaftswachstum", d: "BIP-Wachstum ca. 2–3%" },
+        ],
+      },
+    ],
+  },
+
+  // ============= 3-SCHICHTEN-MODELL =============
+  {
+    id: "altersvorsorge-3-schichten",
+    cat: "Altersvorsorge",
+    title: "3 Schichten der Altersvorsorge",
+    color: "purple",
+    sections: [
+      {
+        h: "Überblick",
+        items: [
+          { t: "Schicht 1 — Basisversorgung", d: "Gesetzliche Rente · Rürup-Rente (Basisrente) · berufsständische Versorgung. Steuerlich: nachgelagerte Besteuerung." },
+          { t: "Schicht 2 — Zusatzversorgung", d: "Betriebliche Altersvorsorge (z.B. Direktversicherung) · Riester-Rente. Staatliche Förderung in der Ansparphase." },
+          { t: "Schicht 3 — Private Vorsorge", d: "Private Renten-/Lebensversicherungen, Banksparpläne, Fonds, Immobilien. Keine staatliche Förderung in der Ansparphase." },
+        ],
+      },
+    ],
+  },
+
+  // ============= GESETZLICHE RV =============
+  {
+    id: "gesetzliche-rv",
+    cat: "Versicherung",
+    title: "Gesetzliche Rentenversicherung (RV)",
+    color: "blue",
+    sections: [
+      {
+        h: "Grundlagen",
+        items: [
+          { t: "System", d: "Umlageverfahren — die aktiven Beitragszahler finanzieren die heutigen Rentner. Generationenvertrag." },
+          { t: "Träger", d: "Deutsche Rentenversicherung (DRV)." },
+          { t: "Beitragssatz 2026", d: "18,6 % (paritätisch: AG 9,3 % + AN 9,3 %)." },
+          { t: "BBG Rente 2026 (West)", d: "8.450 €/Monat = 101.400 €/Jahr." },
+        ],
+      },
+      {
+        h: "Rentenformel",
+        items: [
+          { t: "Formel", d: "Monatliche Rente = Entgeltpunkte (EP) × Zugangsfaktor × Aktueller Rentenwert × Rentenartfaktor" },
+          { t: "Entgeltpunkte (EP)", d: "Pro Jahr: persönliches Brutto / Durchschnittsentgelt aller Versicherten. Wer Durchschnitt verdient = 1 EP/Jahr." },
+          { t: "Zugangsfaktor", d: "1,0 bei regulärem Renteneintritt. − 0,3 % pro Monat früheren Bezug · + 0,5 % pro Monat späteren Bezug." },
+          { t: "Aktueller Rentenwert (West)", d: "Stand Juli 2025: 40,79 €/EP. Wird jährlich zum 1. Juli angepasst." },
+          { t: "Rentenartfaktor", d: "Altersrente = 1,0 · Volle EM-Rente = 1,0 · Halbe EM-Rente = 0,5 · Witwen-/Witwerrente = 0,55–0,6" },
+        ],
+      },
+      {
+        h: "Leistungsarten",
+        items: [
+          { t: "Altersrente", d: "Regelaltersgrenze aktuell 67 Jahre (Stufenweise eingeführt)." },
+          { t: "Erwerbsminderungsrente", d: "Bei dauerhafter Krankheit/Behinderung — Voraussetzungen siehe eigenes Kapitel." },
+          { t: "Hinterbliebenenrenten", d: "Witwen-/Witwerrente · Waisenrente." },
+        ],
+      },
+    ],
+  },
+
+  // ============= RIESTER =============
+  {
+    id: "riester",
+    cat: "Versicherung",
+    title: "Riester-Rente",
+    color: "green",
+    sections: [
+      {
+        h: "Was ist das?",
+        items: [
+          { t: "Definition", d: "Staatlich geförderte private Altersvorsorge (Schicht 2). Eingeführt 2002. Reform ab 2027 (Altersvorsorgedepot) — für Klassenarbeit gelten noch die ALTEN Regeln." },
+        ],
+      },
+      {
+        h: "Förderberechtigt",
+        items: [
+          { t: "Direkt zulageberechtigt", d: "Pflichtversicherte in der gesetzl. RV · Beamte · Soldaten · Empfänger von Lohnersatzleistungen." },
+          { t: "Mittelbar zulageberechtigt", d: "Ehepartner direkt Zulageberechtigter — eigener Vertrag, mind. 60 € Sockelbetrag pro Jahr." },
+          { t: "Nicht förderberechtigt", d: "Selbstständige (außer rentenversicherungspflichtig), freiwillig gesetzlich Versicherte." },
+        ],
+      },
+      {
+        h: "Zulagen 2026",
+        items: [
+          { t: "Grundzulage", d: "175 € / Jahr für jeden Zulageberechtigten." },
+          { t: "Kinderzulage (geb. ab 2008)", d: "300 € / Jahr / Kind, solange Kindergeldbezug." },
+          { t: "Kinderzulage (geb. vor 2008)", d: "185 € / Jahr / Kind." },
+          { t: "Berufseinsteigerbonus", d: "Einmalig 200 € extra, wenn Vertragsabschluss vor 25. Geburtstag." },
+        ],
+      },
+      {
+        h: "Eigenbeitrag & Förderung",
+        items: [
+          { t: "Mindesteigenbeitrag (für volle Zulage)", d: "4 % des rentenversicherungspflichtigen Vorjahres-Bruttoeinkommens, abzüglich Zulagen. Maximal 2.100 € / Jahr (inkl. Zulagen). Sockelbetrag: mind. 60 € / Jahr." },
+          { t: "Sonderausgabenabzug (§10a EStG)", d: "Bis 2.100 € / Jahr (Alleinstehende) bzw. 4.200 € / Ehepaar als Sonderausgaben absetzbar." },
+          { t: "Günstigerprüfung", d: "Finanzamt prüft automatisch: Zulagen oder Sonderausgabenabzug — der Sparer bekommt das Bessere. Bei höheren Einkommen meist Steuervorteil > Zulagen." },
+        ],
+      },
+      {
+        h: "Auszahlung",
+        items: [
+          { t: "Beginn", d: "Frühestens ab 62 (bei Verträgen vor 2012: ab 60)." },
+          { t: "Form", d: "Lebenslange Leibrente. Bis zu 30 % können einmalig zu Rentenbeginn entnommen werden — Rest als Rente." },
+          { t: "Besteuerung", d: "Nachgelagerte Besteuerung — Auszahlung voll steuerpflichtig." },
+        ],
+      },
+      {
+        h: "Beispiel-Rechnung",
+        items: [
+          { t: "Familie, 35.000 € Brutto, 2 Kinder ab 2008", d: "Mindesteigenbeitrag = 4% × 35.000 = 1.400 €. Davon ab: Zulagen 175 + 600 = 775 €. Eigene Einzahlung = 1.400 − 775 = **625 € pro Jahr**. Vertrag wächst um 1.400 €/Jahr." },
+        ],
+      },
+    ],
+  },
+
+  // ============= bAV =============
+  {
+    id: "direktversicherung",
+    cat: "Versicherung",
+    title: "Direktversicherung (bAV)",
+    color: "blue",
+    sections: [
+      {
+        h: "Was ist das?",
+        items: [
+          { t: "Definition", d: "Form der betrieblichen Altersvorsorge. AG schließt Lebens-/Rentenversicherung auf das Leben des AN ab." },
+        ],
+      },
+      {
+        h: "Rollen",
+        items: [
+          { t: "Arbeitgeber (AG)", d: "Versicherungsnehmer — zahlt ein, führt Vertrag." },
+          { t: "Arbeitnehmer (AN)", d: "Versicherte Person + Bezugsberechtigter." },
+          { t: "Versicherer", d: "Lebensversicherungsgesellschaft." },
+        ],
+      },
+      {
+        h: "Entgeltumwandlung",
+        items: [
+          { t: "Funktionsweise", d: "AN verzichtet auf Teil des Bruttogehalts (z.B. 150 €). Geht direkt in Vertrag → KEINE Lohnsteuer und KEINE SV-Beiträge auf den Teil." },
+        ],
+      },
+      {
+        h: "Staatliche Förderung (§ 3 Nr. 63 EStG)",
+        items: [
+          { t: "Steuerfrei", d: "Bis 8% der BBG Rente." },
+          { t: "SV-frei", d: "Bis 4% der BBG Rente." },
+          { t: "BBG Rente 2026", d: "8.450 €/Monat × 12 = 101.400 €/Jahr → 4% = 338 €/Monat sv-frei · 8% = 676 €/Monat steuerfrei." },
+        ],
+      },
+      {
+        h: "AG-Pflichtzuschuss (§ 1a Abs. 1a BetrAVG)",
+        items: [
+          { t: "15% obendrauf", d: "AG muss 15% des umgewandelten Betrags zusätzlich zahlen — weil er durch EU SV-Beiträge spart." },
+        ],
+      },
+      {
+        h: "✓ Vorteile AN",
+        items: [
+          { t: "Liste", d: "1. Staatliche Förderung (Steuer + SV-frei). 2. 15% AG-Pflichtzuschuss. 3. Insolvenzschutz. 4. Portabilität bei Jobwechsel. 5. Sofortige Unverfallbarkeit bei EU. 6. Keine Gesundheitsprüfung (Gruppenvertrag). 7. Hinterbliebenenschutz möglich." },
+        ],
+      },
+      {
+        h: "✗ Nachteile",
+        items: [
+          { t: "Doppelverbeitragung", d: "In Auszahlungsphase volle KV/PV-Beiträge." },
+          { t: "Nachgelagerte Besteuerung", d: "Rente voll steuerpflichtig." },
+          { t: "Geringere gesetzl. Rente", d: "Brutto für RV sinkt → weniger Einzahlung in gesetzl. RV." },
+        ],
+      },
+    ],
+  },
+  {
+    id: "gehaltsrechnung",
+    cat: "Versicherung",
+    title: "Gehaltsrechnung mit/ohne EU",
+    color: "green",
+    sections: [
+      {
+        h: "Schema",
+        items: [
+          { t: "Reihenfolge", d: "Brutto − EU = steuer-/sv-pflichtiges Entgelt − Lohnsteuer (+Soli/KiSt) − SV-Beiträge AN-Anteil = Netto." },
+        ],
+      },
+      {
+        h: "SV-Sätze AN-Anteil 2026 (~21,05 %)",
+        items: [
+          { t: "KV + PV", d: "~10,55% AN" },
+          { t: "RV + ALV", d: "~10,60% AN" },
+          { t: "Zusätze", d: "Kinderlos ab 23: +0,6% extra. 2–5 Kinder: −0,25%/Kind, max −1,0%." },
+          { t: "Hinweis", d: "Immer den Wert vom Aufgabenblatt nehmen." },
+        ],
+      },
+      {
+        h: "Beispiel Meike (3.300 € Brutto, 150 € EU)",
+        items: [
+          { t: "OHNE EU", d: "3.300 − LSt 359,75 − SV (21,05%) 694,65 = **Netto 2.245,60 €**" },
+          { t: "MIT EU (150 €)", d: "Brutto-EU 3.150 − LSt 325,41 − SV 662,96 = **Netto 2.161,63 €**" },
+          { t: "Ergebnis", d: "Netto-Verzicht: 83,97 €. Einzahlung: 150 + 22,50 (15% AG) = 172,50 €. → Für 83,97 € Verzicht → 172,50 € Altersvorsorge." },
+        ],
+      },
+    ],
+  },
+
+  // ============= KAPITAL-LV =============
+  {
+    id: "klv",
+    cat: "Versicherung",
+    title: "Kapitallebensversicherung (KLV)",
+    color: "amber",
+    sections: [
+      {
+        h: "Was ist das?",
+        items: [
+          { t: "Definition", d: "Lebensversicherung mit Spar- und Risikoanteil. Zahlt bei Tod (Hinterbliebene) oder bei Erleben des Vertragsendes (an den Versicherten)." },
+          { t: "Doppelfunktion", d: "1. Todesfallabsicherung. 2. Kapitalaufbau / Altersvorsorge." },
+        ],
+      },
+      {
+        h: "Beitragszusammensetzung",
+        items: [
+          { t: "Sparanteil", d: "Wird angelegt → bildet das Kapital + Überschussbeteiligung." },
+          { t: "Risikoanteil", d: "Deckt das Todesfallrisiko ab." },
+          { t: "Kostenanteil", d: "Verwaltung, Abschlusskosten." },
+        ],
+      },
+      {
+        h: "Steuerliche Behandlung (Neu-Verträge ab 2005)",
+        items: [
+          { t: "Halbeinkünfteverfahren", d: "Wenn Vertrag mind. 12 Jahre läuft UND Auszahlung frühestens mit 62: Nur die HÄLFTE der Erträge ist steuerpflichtig (mit persönlichem Steuersatz)." },
+          { t: "Volle Steuerpflicht", d: "Wenn die o.g. Bedingungen NICHT erfüllt → komplette Erträge unterliegen der Abgeltungsteuer (25% + Soli + ggf. KiSt)." },
+          { t: "Alt-Verträge (vor 2005)", d: "Bei Erfüllung der Voraussetzungen meist vollständig steuerfrei." },
+        ],
+      },
+      {
+        h: "KLV vs. RLV",
+        items: [
+          { t: "RLV", d: "Reine Risikoabsicherung. Zahlt NUR bei Tod. Kein Sparanteil. Sehr günstig." },
+          { t: "KLV", d: "Risiko + Sparanteil. Zahlt bei Tod ODER bei Erleben. Deutlich teurer." },
+          { t: "Tipp im Bankgespräch", d: "Trennung empfohlen: RLV für Risiko + ETF/Fonds für Sparen → meist mehr Rendite." },
+        ],
+      },
+    ],
+  },
+  {
+    id: "rlv",
+    cat: "Versicherung",
+    title: "Risikolebensversicherung (RLV)",
+    color: "red",
+    sections: [
+      {
+        h: "Zweck",
+        items: [
+          { t: "Reine Todesfallabsicherung", d: "KEIN Sparanteil. Zahlt vereinbarte VS an Hinterbliebene." },
+        ],
+      },
+      {
+        h: "4 Formen",
+        items: [
+          { t: "Konstant", d: "Gleichbleibende VS. Einsatz: Familie, Lebenshaltung." },
+          { t: "Fallend", d: "VS sinkt über Zeit. Einsatz: Immobilienkredit (Restschuld sinkt)." },
+          { t: "Verbunden", d: "2 Personen, 1 Vertrag, Auszahlung beim ERSTEN Tod. Bei Unverheirateten → Erbschaftsteuer-Problem!" },
+          { t: "Überkreuz", d: "2 getrennte Verträge, jeder versichert den anderen. Unverheiratete → KEINE Erbschaftsteuer." },
+        ],
+      },
+      {
+        h: "Beitragsfaktoren",
+        items: [
+          { t: "Liste", d: "Alter · Gesundheit · Raucher · Beruf · Laufzeit · Versicherungssumme." },
+        ],
+      },
+    ],
+  },
+
+  // ============= EM / BU =============
+  {
+    id: "em-rente",
+    cat: "Versicherung",
+    title: "Erwerbsminderung (staatlich)",
+    color: "amber",
+    sections: [
+      {
+        h: "Wichtig",
+        items: [
+          { t: "Kein Berufsschutz", d: "Schützt NICHT den ausgeübten Beruf — sondern die Fähigkeit, überhaupt zu arbeiten. Wer noch irgendeinen Job ≥6h/Tag machen kann → bekommt **NICHTS**." },
+        ],
+      },
+      {
+        h: "2 Stufen",
+        items: [
+          { t: "Teilweise EM", d: "3–<6 h/Tag auf allg. Arbeitsmarkt → halbe EM-Rente." },
+          { t: "Volle EM", d: "<3 h/Tag auf allg. Arbeitsmarkt → volle EM-Rente." },
+        ],
+      },
+      {
+        h: "Versicherungsrechtliche Voraussetzungen",
+        items: [
+          { t: "Wartezeiten", d: "5 Jahre Wartezeit + 3 Jahre Pflichtbeiträge in den letzten 5 Jahren." },
+          { t: "Träger", d: "Deutsche Rentenversicherung (DRV)." },
+        ],
+      },
+    ],
+  },
+  {
+    id: "bu",
+    cat: "Versicherung",
+    title: "Berufsunfähigkeit (privat)",
+    color: "purple",
+    sections: [
+      {
+        h: "Definition",
+        items: [
+          { t: "BU-Voraussetzung", d: "Ärztlich nachgewiesen dauerhaft (≥6 Monate) zu mind. 50% außerstande, den zuletzt ausgeübten Beruf auszuüben." },
+          { t: "Leistung", d: "Monatliche BU-Rente. Träger: private Versicherung." },
+        ],
+      },
+      {
+        h: "4+ Beitragsfaktoren",
+        items: [
+          { t: "Beruf / Berufsgruppe", d: "Bürojob billig, Dachdecker teuer." },
+          { t: "Alter bei Abschluss", d: "Je jünger, desto günstiger." },
+          { t: "Gesundheitszustand", d: "Vorerkrankungen erhöhen Beitrag." },
+          { t: "Hobbys", d: "Risikosportarten teurer." },
+          { t: "Weitere", d: "Laufzeit, BU-Rente-Höhe, Raucher/Nichtraucher." },
+        ],
+      },
+      {
+        h: "Wechselwirkung mit EM",
+        items: [
+          { t: "Parallel zahlbar", d: "Staatliche EM-Rente fällt NICHT weg, wenn private BU bezogen wird." },
+        ],
+      },
+      {
+        h: "BU vs. Unfall",
+        items: [
+          { t: "Aussage \"Unfall ersetzt BU\" = FALSCH", d: "Unfall zahlt nur bei Unfall. ~90% der BU-Fälle = Krankheit (Psyche, Rücken, Krebs, Herz-Kreislauf)." },
+        ],
+      },
+    ],
+  },
+  {
+    id: "unfall",
+    cat: "Versicherung",
+    title: "Private Unfallversicherung",
+    color: "amber",
+    sections: [
+      {
+        h: "Wann zahlt sie?",
+        items: [
+          { t: "Nur bei Unfall", d: "Plötzliches, äußeres Ereignis. Krankheit nicht abgedeckt." },
+          { t: "Berechnung", d: "Leistung = VS × Invaliditätsgrad (Gliedertaxe) × ggf. Progression." },
+        ],
+      },
+      {
+        h: "Gliedertaxe",
+        items: [
+          { t: "Arme & Beine", d: "Arm 70% · Hand 55% · Bein (oberhalb Mitte Oberschenkel) 70% · Fuß 40%" },
+          { t: "Sinne", d: "Auge 50% · Ohr 30% · Geruch 10% · Geschmack 5%" },
+          { t: "Finger", d: "Daumen 20% · Zeigefinger 10% · andere Finger 5%" },
+        ],
+      },
+      {
+        h: "Progression",
+        items: [
+          { t: "Wann?", d: "Ab >25% Invalidität steigt Leistung überproportional." },
+          { t: "P500", d: "Bei 100% Invalidität = 5-fache VS. VS 100.000 €, Auge (50%), P500 → ca. 100.000 € Auszahlung." },
+        ],
+      },
+    ],
+  },
+];
+
+
+// src/data/humInfo.js
+// HUM Info — Frau HOL — LF 13 Finanzierungen für Geschäfts- und Firmenkunden
+// Fall: Bäckerei Zeiler GmbH (1.400.000 € Investitionskredit + 150.000 € Betriebsmittel)
+
+const HUMINFO_TOPICS = [
+  {
+    id: "hol-hints",
+    cat: "Hints",
+    title: "⚠️ Frau-HOL-Hints (was wahrscheinlich drankommt)",
+    color: "amber",
+    sections: [
+      {
+        h: "Aus Audio + Klassenchat",
+        items: [
+          { t: "Soft Skills bei Kreditwürdigkeit", d: "Frau HOL hat das im Audio extra betont." },
+          { t: "Kreditüberwachung NACH Auszahlung", d: "Frau HOL Audio — wird gerne abgefragt." },
+          { t: "MaRisk + Markt/Marktfolge-Trennung", d: "Frau HOL Audio." },
+          { t: "Alle 3 Darlehensformen INKL. Festdarlehen", d: "Frau HOL Audio — Festdarlehen NICHT vergessen!" },
+          { t: "Formeln auswendig", d: "Tim im Klassenchat." },
+          { t: "Baufi NICHT mehr dran", d: "Tim im Klassenchat." },
+        ],
+      },
+    ],
+  },
+  {
+    id: "uf-grundlagen",
+    cat: "Grundlagen",
+    title: "Unternehmensfinanzierung — Außen/Innen + EK/FK",
+    color: "blue",
+    sections: [
+      {
+        h: "Außen vs. Innen",
+        items: [
+          { t: "Außenfinanzierung", d: "Geld kommt von **draußen**. Beispiele: Bankkredit, neue Gesellschafter." },
+          { t: "Innenfinanzierung", d: "Geld kommt **aus dem Unternehmen selbst**. Beispiele: einbehaltene Gewinne, Abschreibungen." },
+          { t: "Zeiler-Fall", d: "1,55 Mio. € braucht er → kann er nicht intern aufbringen → **Außenfinanzierung über Kredit (FK)**." },
+        ],
+      },
+      {
+        h: "EK vs. FK — Bilanz",
+        items: [
+          { t: "Eigenkapital (EK)", d: "Eigentümer · Passivseite oben · Stammkapital, Rücklagen, Bilanzgewinn." },
+          { t: "Fremdkapital (FK)", d: "Gläubiger (z.B. Bank) · Passivseite unten · Verbindlichkeiten, **Rückstellungen**, Bankdarlehen." },
+        ],
+      },
+      {
+        h: "⚠️ KLAUSUR-FALLE: Rückstellung vs. Rücklage",
+        items: [
+          { t: "Rückstellung = FK", d: "Schuld die noch kommt — Pensionszusagen, drohende Steuernachzahlung. **IMMER FK!**" },
+          { t: "Rücklage = EK", d: "Einbehaltener Gewinn der Eigentümer." },
+          { t: "Merken", d: "Frau HOL fragt das gerne als Fangfrage. **Rückstellung = FK. Immer.**" },
+        ],
+      },
+    ],
+  },
+  {
+    id: "kontokorrent",
+    cat: "Kreditarten",
+    title: "Kontokorrentkredit (Dispo)",
+    color: "green",
+    sections: [
+      {
+        h: "Eigenschaften",
+        items: [
+          { t: "Laufzeit", d: "Kurzfristig, variabler Zins (teuer, z.B. 9,25 %)." },
+          { t: "Zweck", d: "Kreditlinie auf dem Geschäftskonto, für Betriebsmittel (Rohstoffe, Löhne, Überbrückung)." },
+          { t: "Zeiler-Fall", d: "150.000 € Betriebsmittellinie." },
+        ],
+      },
+      {
+        h: "Genehmigt vs. Geduldet",
+        items: [
+          { t: "Genehmigte Überziehung", d: "Vereinbart, niedrigerer Zins (z.B. 6,50 %). Bis Kreditlinie." },
+          { t: "Geduldete Überziehung", d: "Bank toleriert nur, höherer Zins (z.B. 11 %). Über Kreditlinie." },
+        ],
+      },
+    ],
+  },
+  {
+    id: "investitionskredit",
+    cat: "Kreditarten",
+    title: "Investitionskredit",
+    color: "blue",
+    sections: [
+      {
+        h: "Eigenschaften",
+        items: [
+          { t: "Laufzeit + Zins", d: "Langfristig, Festzins (z.B. 4,0–4,25 %)." },
+          { t: "Zweck", d: "Maschinen, Hallen, Fahrzeuge." },
+          { t: "Form", d: "Wird als Annuitäten- oder Tilgungsdarlehen ausgezahlt." },
+          { t: "Zeiler-Fall", d: "1.400.000 €." },
+        ],
+      },
+    ],
+  },
+  {
+    id: "darlehensformen",
+    cat: "Kreditarten",
+    title: "3 Darlehensformen (alle drei!)",
+    color: "red",
+    sections: [
+      {
+        h: "Vergleichstabelle",
+        items: [
+          { t: "Annuitätendarlehen", d: "Annuität (Rate) **gleich** · Tilgung **steigt** · Zinsen **sinken**." },
+          { t: "Tilgungsdarlehen", d: "Annuität (Rate) **sinkt** · Tilgung **gleich** · Zinsen **sinken**." },
+          { t: "Festdarlehen (endfällig)", d: "Rate = nur Zinsen · Tilgung **0** während Laufzeit (am Ende alles in einer Summe) · Zinsen **gleich**." },
+        ],
+      },
+      {
+        h: "⚠️ FALLE",
+        items: [
+          { t: "Festdarlehen-Risiko", d: "Am Ende muss die volle Summe da sein. Sonst Anschlussfinanzierung nötig. **Tilgung ist NICHT 0 in der Rate** — sie kommt nur am ENDE in einer Summe." },
+        ],
+      },
+    ],
+  },
+  {
+    id: "aval-leasing-factoring",
+    cat: "Kreditarten",
+    title: "Avalkredit · Leasing · Factoring",
+    color: "purple",
+    sections: [
+      {
+        h: "Avalkredit",
+        items: [
+          { t: "Was", d: "Bank gibt **kein Geld**, sondern eine **Bürgschaft/Garantie**." },
+          { t: "Verdienst", d: "Bank verdient Avalprovision — muss aber zahlen, wenn Kunde nicht leistet." },
+        ],
+      },
+      {
+        h: "Leasing",
+        items: [
+          { t: "Funktion", d: "Nutzung auf Zeit. Monatliche Leasingrate." },
+          { t: "⚠️ FALLE", d: "**Leasingnehmer = Besitzer** | **Leasinggeber = Eigentümer**. Klausurfalle!" },
+        ],
+      },
+      {
+        h: "Factoring",
+        items: [
+          { t: "Funktion", d: "Forderungsverkauf an einen Factor. Statt 30 Tage warten → sofort Geld." },
+          { t: "3 Funktionen", d: "**Finanzierung** · **Delkredere** (Ausfallrisiko) · **Dienstleistung**." },
+        ],
+      },
+    ],
+  },
+  {
+    id: "avalarten",
+    cat: "Kreditarten",
+    title: "Avalarten + Bürgschaft vs. Garantie",
+    color: "purple",
+    sections: [
+      {
+        h: "Avalarten",
+        items: [
+          { t: "Mietaval", d: "Mietkaution Gewerbeimmobilie." },
+          { t: "Zollaval", d: "Zollgebühren bei Import/Export." },
+          { t: "Bietungsgarantie", d: "Bei Ausschreibungen (Bewerbung um Auftrag)." },
+          { t: "Anzahlungsgarantie", d: "Sicherung der Anzahlung des Käufers." },
+          { t: "Zahlungsgarantie", d: "Bank garantiert Zahlung an Lieferant." },
+          { t: "Gewährleistungsgarantie", d: "Sicherung der Gewährleistung nach Fertigstellung." },
+        ],
+      },
+      {
+        h: "Bürgschaft vs. Garantie",
+        items: [
+          { t: "Bürgschaft = AKZESSORISCH", d: "An Hauptforderung gebunden. Wenn Hauptschuld weg → Bürgschaft auch weg. Riskanter für Bank." },
+          { t: "Garantie = ABSTRAKT", d: "Unabhängig. Steht für sich, immer fällig wenn ausgelöst. Sicher für Bank." },
+        ],
+      },
+    ],
+  },
+  {
+    id: "kreditpruefung",
+    cat: "Kreditprüfung",
+    title: "Kreditfähigkeit + Kreditwürdigkeit",
+    color: "green",
+    sections: [
+      {
+        h: "Kreditfähigkeit (rechtlich)",
+        items: [
+          { t: "Frage", d: "Darf der Kunde rechtlich überhaupt einen Kredit aufnehmen?" },
+          { t: "Voraussetzungen", d: "Volljährig · unbeschränkt geschäftsfähig · bei GmbH: vertretungsberechtigte Person (GF / Prokurist mit Vollmacht)." },
+        ],
+      },
+      {
+        h: "Wirtschaftliche Kreditwürdigkeit (Zahlen)",
+        items: [
+          { t: "Was zählt", d: "Bilanzanalyse + Kennziffern · Ertragslage (GuV) · Cashflow · Branchenrating." },
+        ],
+      },
+      {
+        h: "⚠️ Persönliche Kreditwürdigkeit (Soft Skills) — Frau HOL betont!",
+        items: [
+          { t: "Aufgeschlossenheit / Kooperationsbereitschaft", d: "Liefert der Kunde Unterlagen pünktlich? Ist er offen für Rückfragen?" },
+          { t: "Reputation in Branche und Region", d: "Wie ist der Ruf?" },
+          { t: "Wichtigkeit / Bedeutung für die Bank", d: "Wie wichtig ist der Kunde für uns?" },
+          { t: "Geschäftliche Erfahrung des Inhabers", d: "Branchenerfahrung, Erfolge in der Vergangenheit." },
+          { t: "Persönliche Lebensführung", d: "Solides Privatleben, keine Skandale." },
+        ],
+      },
+      {
+        h: "Erforderliche Unterlagen",
+        items: [
+          { t: "Liste", d: "Letzte **3 Jahresabschlüsse** (Bilanz + GuV) · aktuelle BWA · Selbstauskunft / Vermögensübersicht · Handelsregisterauszug · Gesellschaftsvertrag · Investitionsplan + Kostenvoranschläge · Schufa-Selbstauskunft." },
+        ],
+      },
+    ],
+  },
+  {
+    id: "kwg",
+    cat: "Recht",
+    title: "KWG-Paragraphen + MaRisk",
+    color: "red",
+    sections: [
+      {
+        h: "Wichtige KWG §§",
+        items: [
+          { t: "§ 13 KWG — Großkredit", d: "Kredit > 10 % des haftenden EK der Bank → Anzeige an BaFin + Bundesbank." },
+          { t: "§ 14 KWG — Millionenkredit", d: "Kredit ≥ 1 Mio. € → Meldung an Evidenzzentrale." },
+          { t: "§ 15 KWG — Organkredit", d: "Kredit an Vorstand/AR → einstimmiger Beschluss aller Geschäftsleiter." },
+          { t: "§ 18 KWG — Offenlegung", d: "Kredit > **750.000 €** → **Offenlegung der wirtschaftlichen Verhältnisse — PFLICHT!**" },
+        ],
+      },
+      {
+        h: "Zeiler-Fall",
+        items: [
+          { t: "1,55 Mio. €", d: "Klar über 750k → § 18 greift IMMER." },
+        ],
+      },
+      {
+        h: "MaRisk — Markt/Marktfolge-Trennung",
+        items: [
+          { t: "Markt", d: "Vertrieb / Kundenbetreuer (will den Kredit)." },
+          { t: "Marktfolge", d: "Kreditprüfung / Risiko (entscheidet ob's geht)." },
+          { t: "Trennung", d: "Beide Bereiche **bis zur Vorstandsebene strikt getrennt** — schützt vor Interessenkonflikten. 4-Augen-Prinzip." },
+        ],
+      },
+    ],
+  },
+  {
+    id: "bilanz",
+    cat: "Bilanz",
+    title: "Bilanz lesen — Zeiler GmbH",
+    color: "blue",
+    sections: [
+      {
+        h: "Bilanz-Aufbau",
+        items: [
+          { t: "Aktiva (Mittelverwendung)", d: "**Anlagevermögen** (langfristig): Grundstücke, Gebäude, Maschinen, BGA, Fuhrpark · **Umlaufvermögen** (kurzfristig): Vorräte, Forderungen, liquide Mittel." },
+          { t: "Passiva (Mittelherkunft)", d: "**Eigenkapital**: Stammkapital, Rücklagen, Bilanzgewinn · **Fremdkapital**: Rückstellungen, langfr. Verb., kurzfr. Verb." },
+        ],
+      },
+      {
+        h: "Zeiler-Werte (Jahr 3, in Tsd. €) — auswendig!",
+        items: [
+          { t: "Eigenkapital", d: "Stammkapital 354 + Rücklagen 2 + Bilanzgewinn 48 = **EK 404**." },
+          { t: "Gesamtkapital", d: "**GK = 2.390**." },
+          { t: "Anlagevermögen", d: "927 + 901 + 163 + 15 = **AV 2.006**." },
+          { t: "Liquide Mittel", d: "44 + 8 = **52**." },
+          { t: "Langfr. FK", d: "**1.452**." },
+          { t: "Umsatz Jahr 3", d: "**3.085**." },
+        ],
+      },
+    ],
+  },
+  {
+    id: "kennziffern-bilanz",
+    cat: "Kennziffern",
+    title: "Bilanzkennziffern (alle Formeln!)",
+    color: "amber",
+    sections: [
+      {
+        h: "EK-Quote",
+        items: [
+          { t: "Frage", d: "Wie viel % gehört den Eigentümern?" },
+          { t: "Formel", d: "**EK × 100 / GK**" },
+          { t: "Zeiler", d: "404 × 100 / 2.390 = **16,9 %**." },
+          { t: "Branchenwert", d: "Sollte > 20 % → **Zeiler drunter, Risiko**." },
+        ],
+      },
+      {
+        h: "Verschuldungsgrad",
+        items: [
+          { t: "Frage", d: "Wie viel % sind Schulden?" },
+          { t: "Formel", d: "**FK × 100 / GK**" },
+          { t: "Trick", d: "Gegenstück zur EK-Quote → 100 % − 16,9 % = 83,1 %." },
+        ],
+      },
+      {
+        h: "Anlagendeckung I — Goldene Bilanzregel",
+        items: [
+          { t: "Frage", d: "Deckt EK das gesamte AV?" },
+          { t: "Formel", d: "**EK × 100 / AV**" },
+          { t: "Soll", d: "≥ 100 %." },
+        ],
+      },
+      {
+        h: "Anlagendeckung II — Silberne Bilanzregel",
+        items: [
+          { t: "Frage", d: "Decken EK + langfr. FK das AV?" },
+          { t: "Formel", d: "**(EK + langfr. FK) × 100 / AV**" },
+          { t: "Soll", d: "≥ 100 %." },
+          { t: "Zeiler", d: "(404 + 1.452) × 100 / 2.006 = 1.856 × 100 / 2.006 = **92,5 % → silberne Regel NICHT erfüllt**." },
+          { t: "Warum wichtig", d: "Langfristiges Vermögen MUSS langfristig finanziert sein. Sonst finanzierst du eine 10-Jahre-Maschine mit einem 1-Jahres-Kredit → Katastrophe." },
+        ],
+      },
+      {
+        h: "Liquidität 1./2./3. Grades",
+        items: [
+          { t: "Allgemein", d: "Alle Formeln: **... × 100 / kurzfr. Verbindlichkeiten**" },
+          { t: "1. Grad — Barliquidität", d: "Liquide Mittel × 100 / kurzfr. Verb. · Soll: > 20 %." },
+          { t: "2. Grad — Quick Ratio", d: "(Liq. Mittel + Forderungen) × 100 / kurzfr. Verb. · Soll: > 100 %." },
+          { t: "3. Grad — Current Ratio", d: "(Liq. Mittel + Forderungen + Vorräte) × 100 / kurzfr. Verb. · Soll: > 200 % (mind. 120 %)." },
+        ],
+      },
+    ],
+  },
+  {
+    id: "kennziffern-ertrag",
+    cat: "Kennziffern",
+    title: "Ertragskennziffern (aus GuV)",
+    color: "green",
+    sections: [
+      {
+        h: "EK-Rentabilität",
+        items: [
+          { t: "Frage", d: "Lohnt sich's für die Eigentümer?" },
+          { t: "Formel", d: "**Jahresüberschuss × 100 / EK**" },
+        ],
+      },
+      {
+        h: "GK-Rentabilität",
+        items: [
+          { t: "Frage", d: "Wie effizient arbeitet das gesamte Kapital?" },
+          { t: "Formel", d: "**(JÜ + FK-Zinsen) × 100 / GK**" },
+        ],
+      },
+      {
+        h: "Umsatzrentabilität",
+        items: [
+          { t: "Frage", d: "Wie viel bleibt pro Euro Umsatz?" },
+          { t: "Formel", d: "**JÜ × 100 / Umsatz**" },
+        ],
+      },
+      {
+        h: "ROI",
+        items: [
+          { t: "Formel 1", d: "**Umsatzrentabilität × Kapitalumschlag**" },
+          { t: "Formel 2", d: "**(JÜ × 100) / GK**" },
+        ],
+      },
+      {
+        h: "Cashflow",
+        items: [
+          { t: "Frage", d: "Wie viel Geld fließt WIRKLICH?" },
+          { t: "Formel", d: "**JÜ + Abschreibungen + langfr. Rückstellungen**" },
+          { t: "Warum +Abschreibungen?", d: "Buchungstrick — kein echtes Geld fließt raus." },
+        ],
+      },
+      {
+        h: "Debitoren- / Kreditorenziel (Bonus)",
+        items: [
+          { t: "Debitorenziel", d: "Wie lange brauchen Kunden? **Forderungsbestand × 360 / Umsatz**" },
+          { t: "Kreditorenziel", d: "Wie lange brauchen WIR? **Verb. a.LuL × 360 / Materialeinsatz**" },
+        ],
+      },
+    ],
+  },
+  {
+    id: "rating",
+    cat: "Kreditprüfung",
+    title: "Rating (Quantitativ + Qualitativ)",
+    color: "purple",
+    sections: [
+      {
+        h: "Quantitativ (Zahlen, ~70 %)",
+        items: [
+          { t: "Bilanzkennziffern", d: "EK-Quote, Verschuldungsgrad, Anlagendeckung." },
+          { t: "Ertragskennziffern", d: "EK-Rent., Umsatzrent., Cashflow." },
+          { t: "Liquiditätskennziffern", d: "1./2./3. Grades." },
+        ],
+      },
+      {
+        h: "Qualitativ (Soft Facts, ~30 %)",
+        items: [
+          { t: "Kriterien", d: "Management-Qualität / Geschäftsführung · Marktposition · Branchenentwicklung · Strategie · Kontoführung beim Kreditinstitut." },
+        ],
+      },
+      {
+        h: "Ergebnis",
+        items: [
+          { t: "Ratingnote", d: "z.B. AAA bis D bei externen, oder bankinterne Skala." },
+          { t: "Auswirkung", d: "Bestimmt **Zinssatz** und **Sicherheitenanforderungen**." },
+        ],
+      },
+    ],
+  },
+  {
+    id: "annuitaet-rechnung",
+    cat: "Rechnen",
+    title: "Annuitätendarlehen — Schritt für Schritt",
+    color: "red",
+    sections: [
+      {
+        h: "Beispiel: 1.400.000 € · 4,25 % p.a. · 2,0 % anfängliche Tilgung",
+        items: [
+          { t: "1. Annuitätensatz", d: "Zinssatz + Tilgungssatz = **4,25 % + 2,0 % = 6,25 %**." },
+          { t: "2. Annuität pro Monat", d: "1.400.000 × 6,25 % ÷ 12 = **7.291,67 €** → bleibt IMMER gleich." },
+          { t: "3. Zinsen Monat 1", d: "1.400.000 × 4,25 % ÷ 12 = **4.958,33 €**." },
+          { t: "4. Tilgung Monat 1", d: "7.291,67 − 4.958,33 = **2.333,33 €**." },
+          { t: "5. Restdarlehen für Monat 2", d: "1.400.000 − 2.333,33 = **1.397.666,67 €**." },
+          { t: "6. Zinsen Monat 2", d: "1.397.666,67 × 4,25 % ÷ 12 = **4.950,07 €** (weniger!)." },
+          { t: "7. Tilgung Monat 2", d: "7.291,67 − 4.950,07 = **2.341,60 €** (mehr!)." },
+        ],
+      },
+      {
+        h: "Regel + Tipp",
+        items: [
+          { t: "Merksatz", d: "**Annuität gleich · Zinsen sinken · Tilgung steigt.**" },
+          { t: "Frau-HOL-Tipp", d: "Im Taschenrechner einfach `× 4.25 %` tippen — keine 0,0425 nötig." },
+        ],
+      },
+    ],
+  },
+  {
+    id: "tilgung-rechnung",
+    cat: "Rechnen",
+    title: "Tilgungsdarlehen — Schritt für Schritt",
+    color: "amber",
+    sections: [
+      {
+        h: "Beispiel: 1.400.000 € · 4,0 % p.a. · 5,0 % Tilgung",
+        items: [
+          { t: "1. Tilgung pro Monat (gleich!)", d: "1.400.000 × 5 % ÷ 12 = **5.833,33 €**." },
+          { t: "2. Zinsen Monat 1", d: "1.400.000 × 4 % ÷ 12 = **4.666,67 €**." },
+          { t: "3. Rate Monat 1", d: "5.833,33 + 4.666,67 = **10.500,00 €**." },
+          { t: "4. Restdarlehen", d: "1.400.000 − 5.833,33 = **1.394.166,67 €**." },
+          { t: "5. Zinsen Monat 2", d: "1.394.166,67 × 4 % ÷ 12 = **4.647,22 €**." },
+          { t: "6. Rate Monat 2", d: "5.833,33 + 4.647,22 = **10.480,55 €** (weniger!)." },
+        ],
+      },
+      {
+        h: "Regel",
+        items: [
+          { t: "Merksatz", d: "**Tilgung gleich · Zinsen sinken · Rate sinkt.**" },
+        ],
+      },
+    ],
+  },
+  {
+    id: "festdarlehen-rechnung",
+    cat: "Rechnen",
+    title: "Festdarlehen (endfällig)",
+    color: "purple",
+    sections: [
+      {
+        h: "Beispiel: 1.400.000 € · 4,5 % p.a. · 5 Jahre",
+        items: [
+          { t: "Während Laufzeit", d: "Nur Zinsen: 1.400.000 × 4,5 % = **63.000 € pro Jahr**." },
+          { t: "Am Ende Jahr 5", d: "Zinsen + komplette Tilgung **1.400.000 €**." },
+        ],
+      },
+      {
+        h: "⚠️ FALLE",
+        items: [
+          { t: "Tilgung in der Rate", d: "Tilgung ist NICHT 0 in der Rate. Sie kommt am ENDE in einer Summe." },
+          { t: "Risiko", d: "Tilgungsersatz (Lebensvers., Bausparvertrag) muss am Ende 1,4 Mio. € her geben — sonst Anschlussfinanzierung." },
+        ],
+      },
+    ],
+  },
+  {
+    id: "skonto",
+    cat: "Rechnen",
+    title: "Skonto-Effektivzins",
+    color: "green",
+    sections: [
+      {
+        h: "Beispiel: 3 % Skonto bei 10 Tagen, sonst 30 Tage",
+        items: [
+          { t: "Skontofrist", d: "30 − 10 = **20 Tage**." },
+          { t: "Formel", d: "**Skonto-% × 360 / Skontofrist**" },
+          { t: "Rechnung", d: "3 × 360 ÷ 20 = **54 % p.a.**" },
+          { t: "Erkenntnis", d: "Bankkredit (z.B. 9 %) ist VIEL billiger → **Skonto immer ziehen!**" },
+        ],
+      },
+    ],
+  },
+  {
+    id: "kk-zinszahlen",
+    cat: "Rechnen",
+    title: "Kontokorrentkredit — Zinszahlenmethode",
+    color: "blue",
+    sections: [
+      {
+        h: "1. Zinszahl pro Zeitraum",
+        items: [
+          { t: "Formel", d: "**Betrag × Tage ÷ 100**" },
+          { t: "Beispiel", d: "92.210 € für 7 Tage → 92.210 × 7 ÷ 100 = **6.454,70**." },
+        ],
+      },
+      {
+        h: "2. Sollzinsen aus Summe",
+        items: [
+          { t: "Formel", d: "**Summe Zinszahlen × Zinssatz % ÷ 360**" },
+          { t: "Beispiel", d: "Summe 18.530, Satz 6,5 % → 18.530 × 6,5 % ÷ 360 = **3,35**." },
+        ],
+      },
+      {
+        h: "3. Kreditprovision",
+        items: [
+          { t: "Worauf?", d: "Auf den NICHT genutzten Teil." },
+          { t: "Beispiel", d: "Kreditlinie 140.000, genutzt 92.210 → nicht genutzt 47.790 → Zinszahl × 2 % ÷ 360." },
+        ],
+      },
+      {
+        h: "Wichtig",
+        items: [
+          { t: "Zwei-Spalten-Logik", d: "Bis Kreditlinie = genehmigte ÜZ (6,5 %). Über Kreditlinie = geduldete ÜZ (11 %). **Zwei Spalten in der Tabelle!**" },
+        ],
+      },
+    ],
+  },
+  {
+    id: "sicherheiten",
+    cat: "Sicherheiten",
+    title: "Beleihungsgrenzen + SÜ + Grundschuld",
+    color: "amber",
+    sections: [
+      {
+        h: "Beleihungsgrenzen — auswendig!",
+        items: [
+          { t: "Sparbuch", d: "Beleihungswert 100 % · Beleihungsgrenze 100 %." },
+          { t: "Bundesanleihen", d: "100 % · 90–100 %." },
+          { t: "Aktien (DAX)", d: "Kurswert · ~50–60 %." },
+          { t: "Wohnimmobilie", d: "Verkehrs-/Ertragswert · 60 % (1. Rang) / 80 % (2. Rang)." },
+          { t: "Gewerbeimmobilie", d: "Ertragswert · 50–60 %." },
+          { t: "Maschinen", d: "Zeitwert · ~40–50 %." },
+          { t: "Warenlager", d: "Gängige Ware · ~30–50 %." },
+        ],
+      },
+      {
+        h: "Sicherungsübereignung (SÜ)",
+        items: [
+          { t: "Trennung", d: "**Eigentum** geht an die Bank über · **Besitz** bleibt beim Kunden (er nutzt es weiter)." },
+          { t: "Beispiele", d: "Maschinen, Kfz, Warenlager." },
+          { t: "Vorteil", d: "Bank ist abgesichert, Kunde kann weiterarbeiten." },
+        ],
+      },
+      {
+        h: "Grundschuld",
+        items: [
+          { t: "Was", d: "Pfandrecht an einer Immobilie." },
+          { t: "Eintragung", d: "Im Grundbuch (**Abteilung III**)." },
+          { t: "Eigenschaft", d: "**Abstrakt** — nicht an einen konkreten Kredit gebunden (im Gegensatz zur Hypothek)." },
+        ],
+      },
+      {
+        h: "Ertragswertverfahren (Gewerbeimmobilien)",
+        items: [
+          { t: "Formel grob", d: "**Jahresnettomiete × Vervielfältiger**" },
+          { t: "Logik", d: "Kapitalisiert die zukünftigen Mieteinnahmen. Bei Gewerbe wichtiger als bei Wohn (da Sachwertverfahren)." },
+        ],
+      },
+    ],
+  },
+  {
+    id: "zession",
+    cat: "Sicherheiten",
+    title: "Forderungsabtretung (Zession)",
+    color: "red",
+    sections: [
+      {
+        h: "Globalzession vs. Mantelzession",
+        items: [
+          { t: "Globalzession", d: "**ALLE** Forderungen, automatisch auch zukünftige. Einmalig, dann automatisch. Bestimmtheitsgrundsatz schwieriger." },
+          { t: "Mantelzession", d: "Bestimmte Forderungen, nur die in einer Liste. Laufend Listen einreichen. Klare Liste = einfache Bestimmtheit." },
+        ],
+      },
+      {
+        h: "Stille vs. Offene Zession",
+        items: [
+          { t: "Stille Zession", d: "Schuldner erfährt nichts → er zahlt weiter an den Kunden, der leitet weiter." },
+          { t: "Offene Zession", d: "Schuldner wird informiert → zahlt direkt an die Bank." },
+        ],
+      },
+      {
+        h: "Bewertung & Risiken",
+        items: [
+          { t: "Beleihung", d: "Faustregel: ~50–80 % des Forderungsbestands. Abzüge für: Mahnungen, alte Forderungen, Konzentration." },
+          { t: "Gefahren", d: "Doppelabtretung an mehrere Banken · Forderungen schon factoring-belegt · Bestimmtheitsgrundsatz nicht eingehalten · Drittschuldner-Insolvenz." },
+        ],
+      },
+    ],
+  },
+  {
+    id: "kreditueberwachung",
+    cat: "Überwachung",
+    title: "⚠️ Kreditüberwachung NACH Auszahlung",
+    color: "red",
+    sections: [
+      {
+        h: "Frau HOL betont das EXTRA!",
+        items: [
+          { t: "Hinweis", d: "Kreditprüfung passiert VOR Auszahlung. Aber die Bank überwacht auch DANACH laufend!" },
+        ],
+      },
+      {
+        h: "Was prüft die Bank laufend?",
+        items: [
+          { t: "Quartalsweise", d: "BWA (Betriebswirtschaftliche Auswertung)." },
+          { t: "Jährlich", d: "Jahresabschluss (Bilanz + GuV)." },
+          { t: "Bei Investitionen", d: "Kostenvoranschläge prüfen — wird das Geld wirklich für den vereinbarten Zweck genutzt?" },
+          { t: "Laufend", d: "Kontoführung (KK-Linie eingehalten? Ausschöpfung?)." },
+          { t: "Anlassbezogen", d: "Branchen-News, persönliche Veränderungen, Rating-Updates." },
+        ],
+      },
+      {
+        h: "Frühwarnsignale",
+        items: [
+          { t: "Liste", d: "Kreditlinie wird ständig voll ausgeschöpft · Lastschriften zurückgegeben · BWA verschlechtert sich · Kunde reicht Unterlagen nicht mehr ein · Branche kippt." },
+        ],
+      },
+      {
+        h: "Reaktionen der Bank",
+        items: [
+          { t: "Stufenfolge", d: "1. Gespräch suchen → 2. Unterlagen nachfordern → 3. Sicherheiten verstärken → 4. Linie reduzieren → 5. Im Extremfall: **Kündigung des Kredits**." },
+        ],
+      },
+    ],
+  },
+  {
+    id: "checkliste",
+    cat: "Checkliste",
+    title: "Last-Minute-Checkliste",
+    color: "amber",
+    sections: [
+      {
+        h: "Auswendig sitzen MÜSSEN",
+        items: [
+          { t: "Kennziffern", d: "EK-Quote · Verschuldungsgrad · Anlagendeckung I + II · Liquidität 1./2./3. · EK-Rent. · GK-Rent. · Umsatzrent. · ROI · Cashflow." },
+          { t: "Annuitätenformel", d: "Annuität = Restdarlehen × Zinssatz % ÷ 12 + Tilgung." },
+          { t: "Skonto-Effektivzins", d: "Skonto% × 360 / Skontofrist." },
+          { t: "Zinszahl", d: "Betrag × Tage ÷ 100." },
+          { t: "§ 18 KWG", d: "Schwelle 750.000 €." },
+          { t: "Rückstellung vs. Rücklage", d: "Rückstellung = FK | Rücklage = EK." },
+        ],
+      },
+      {
+        h: "Konzept-Klassiker",
+        items: [
+          { t: "Liste", d: "Soft Skills · Markt/Marktfolge · Kreditüberwachung post-Auszahlung · Festdarlehen-Risiko · Bürgschaft akzessorisch vs. Garantie abstrakt · Globalzession vs. Mantelzession · Leasing: Besitzer ≠ Eigentümer." },
+        ],
+      },
+      {
+        h: "Top-3-Fallen",
+        items: [
+          { t: "Falle 1 — Rückstellung vs. Rücklage", d: "Rückstellung = FK!" },
+          { t: "Falle 2 — Anlagendeckung II", d: "Bei Zeiler 92,5 % → NICHT erfüllt. Soll: ≥ 100 %." },
+          { t: "Falle 3 — Festdarlehen", d: "Tilgung ist NICHT 0 in der Rate. Tilgung kommt erst am ENDE in einer Summe." },
+        ],
+      },
+    ],
+  },
+];
+
+
+const SUBJECTS = {
+  bfk1: { name: "BFK 1", teacher: "Müller", topics: BFK1_TOPICS, categories: ["VWL", "Altersvorsorge", "Versicherung"] },
+  humInfo: { name: "HUM Info", teacher: "Frau HOL", topics: HUMINFO_TOPICS, categories: ["Hints", "Grundlagen", "Kreditarten", "Kreditprüfung", "Recht", "Bilanz", "Kennziffern", "Rechnen", "Sicherheiten", "Überwachung", "Checkliste"] },
+};
+
+const COLOR_MAP = {
+  blue:   { bg: "bg-blue-500/10",    border: "border-blue-500",    text: "text-blue-300",    badge: "bg-blue-500"    },
+  green:  { bg: "bg-emerald-500/10", border: "border-emerald-500", text: "text-emerald-300", badge: "bg-emerald-500" },
+  red:    { bg: "bg-red-500/10",     border: "border-red-500",     text: "text-red-300",     badge: "bg-red-500"     },
+  amber:  { bg: "bg-amber-500/10",   border: "border-amber-500",   text: "text-amber-300",   badge: "bg-amber-500"   },
+  purple: { bg: "bg-purple-500/10",  border: "border-purple-500",  text: "text-purple-300",  badge: "bg-purple-500"  },
+};
+
+function renderInline(text) {
+  const parts = [];
+  let last = 0;
+  const re = /\*\*(.+?)\*\*|\*(.+?)\*/g;
+  let m;
+  while ((m = re.exec(text)) !== null) {
+    if (m.index > last) parts.push(text.slice(last, m.index));
+    if (m[1]) parts.push(<strong key={m.index} className="text-white font-bold">{m[1]}</strong>);
+    else if (m[2]) parts.push(<em key={m.index} className="text-slate-400 not-italic">{m[2]}</em>);
+    last = m.index + m[0].length;
+  }
+  if (last < text.length) parts.push(text.slice(last));
+  return parts;
+}
+
+function LernzettelView({ topics, categories }) {
+  const [filter, setFilter] = useState("Alle");
+  const [search, setSearch] = useState("");
+  const cats = ["Alle", ...categories];
+
+  const filtered = useMemo(() => {
+    return topics.filter((t) => {
+      if (filter !== "Alle" && t.cat !== filter) return false;
+      if (!search) return true;
+      const hay = (t.title + " " + t.sections.map((s) => s.h + " " + s.items.map((i) => i.t + " " + i.d).join(" ")).join(" ")).toLowerCase();
+      return hay.includes(search.toLowerCase());
+    });
+  }, [filter, search, topics]);
+
+  return (
+    <div>
+      <div className="px-4 pt-2 pb-3 border-b border-slate-800">
+        <input type="text" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Suche…"
+          className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm placeholder-slate-500 focus:outline-none focus:border-amber-500" />
+        <div className="flex gap-2 mt-2 overflow-x-auto pb-1">
+          {cats.map((c) => (
+            <button key={c} onClick={() => setFilter(c)}
+              className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition ${
+                filter === c ? "bg-amber-500 text-slate-950" : "bg-slate-800 text-slate-300 hover:bg-slate-700"
+              }`}>
+              {c}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="p-4 space-y-3">
+        {filtered.length === 0 && (<div className="text-center py-12 text-slate-500 text-sm">Nichts gefunden.</div>)}
+        {filtered.map((topic) => {
+          const c = COLOR_MAP[topic.color] || COLOR_MAP.blue;
+          return (
+            <details key={topic.id} className={`rounded-xl border ${c.border} ${c.bg} overflow-hidden`}>
+              <summary className="px-4 py-3 flex items-center justify-between gap-3 active:bg-slate-800/50">
+                <div className="flex items-center gap-3 min-w-0">
+                  <span className={`${c.badge} text-slate-950 text-[10px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider whitespace-nowrap`}>{topic.cat}</span>
+                  <h2 className="font-bold text-sm truncate">{topic.title}</h2>
+                </div>
+                <span className={`chev ${c.text} text-lg leading-none`}>›</span>
+              </summary>
+              <div className="px-4 pb-4 space-y-4 border-t border-slate-800/50 pt-3">
+                {topic.sections.map((sec, i) => (
+                  <div key={i}>
+                    <h3 className={`text-xs font-bold uppercase tracking-wider mb-2 ${c.text}`}>{sec.h}</h3>
+                    <ul className="space-y-2">
+                      {sec.items.map((item, j) => (
+                        <li key={j} className="bg-slate-900/60 rounded-lg p-3 border border-slate-800">
+                          <div className="text-[13px] font-bold text-white mb-1">{renderInline(item.t)}</div>
+                          <div className="text-[12.5px] text-slate-300 leading-relaxed">{renderInline(item.d)}</div>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+            </details>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function App() {
+  const [active, setActive] = useState("bfk1");
+  const subject = SUBJECTS[active];
+
+  return (
+    <div className="max-w-2xl mx-auto pb-24">
+      <header className="sticky top-0 z-10 bg-slate-950/95 backdrop-blur border-b border-slate-800 px-4 pt-3">
+        <div className="flex items-center justify-between mb-3">
+          <div>
+            <h1 className="text-xl font-black tracking-tight">LernenLuca</h1>
+            <p className="text-[11px] text-slate-400 uppercase tracking-wider">{subject.name} · {subject.teacher}</p>
+          </div>
+          <span className="bg-amber-500 text-slate-950 text-[10px] font-bold px-2 py-1 rounded">v2.0</span>
+        </div>
+        <div className="flex gap-1 -mx-4 px-4">
+          {Object.entries(SUBJECTS).map(([key, s]) => (
+            <button key={key} onClick={() => setActive(key)}
+              className={`flex-1 px-3 py-2 text-sm font-semibold rounded-t-lg transition ${
+                active === key ? "bg-slate-900 text-white border-b-2 border-amber-500" : "text-slate-400 hover:text-slate-200"
+              }`}>
+              {s.name}<span className="block text-[10px] font-normal opacity-70">{s.teacher}</span>
+            </button>
+          ))}
+        </div>
+      </header>
+
+      <main>
+        <LernzettelView key={active} topics={subject.topics} categories={subject.categories} />
+      </main>
+
+      <footer className="px-4 mt-4 text-center text-[11px] text-slate-600">
+        LernenLuca · Bankkaufmann
+      </footer>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>
