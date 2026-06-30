@@ -556,6 +556,103 @@ const BFK1_TOPICS = [
       },
     ],
   },
+
+  // ============= Geldanlage =============
+  {
+    id: "derivate",
+    cat: "Geldanlage",
+    title: "Derivate",
+    color: "amber",
+    sections: [
+      {
+        h: "Grundlagen",
+        items: [
+          { t: "Was ist ein Derivat?", d: "Finanzkontrakt, dessen Wert von einem **Basiswert** (Underlying) abgeleitet wird. *(= ich wette auf den Kurs von etwas anderem, ohne es zu besitzen)*" },
+          { t: "Basiswerte", d: "**Aktien, Indizes** (z.B. DAX), **Rohstoffe** (Öl, Gold), **Devisen** (EUR/USD), **Zinsen**." },
+          { t: "3 Zwecke", d: "**Hedging** = Absichern bestehender Positionen. **Spekulation** = auf Kursrichtung wetten. **Arbitrage** = Preisunterschiede risikolos ausnutzen." },
+          { t: "Hebelwirkung (Leverage)", d: "Mit wenig Einsatz große Position bewegen. Hohe Chance, hohes Risiko (bis Totalverlust, bei Stillhaltern/Futures Nachschuss möglich)." },
+        ],
+      },
+      {
+        h: "Termingeschäfte einteilen",
+        items: [
+          { t: "Unbedingt", d: "Beide Seiten **müssen** erfüllen. Beispiele: **Futures** (Börse), **Forwards** (OTC). Symmetrisches Gewinn-/Verlustprofil." },
+          { t: "Bedingt", d: "Käufer hat **Wahlrecht**. Beispiel: **Optionen**. Asymmetrisches Profil — Käufer Verlust max. = Prämie, Stillhalter Risiko hoch." },
+          { t: "Börse vs. OTC", d: "**Börsengehandelt**: standardisiert, Clearingstelle (Kontrahentenrisiko ~0), tägliches Settlement. **OTC** (Over the Counter): individuell, Kontrahentenrisiko." },
+        ],
+      },
+      {
+        h: "Optionen — 4 Grundpositionen",
+        items: [
+          { t: "Call vs. Put", d: "**Call** = Kaufoption (Recht zu kaufen). **Put** = Verkaufsoption (Recht zu verkaufen)." },
+          { t: "Long vs. Short", d: "**Long** = Käufer der Option (zahlt Prämie, hat Recht). **Short** = Verkäufer / **Stillhalter** (kassiert Prämie, hat Pflicht zu liefern bzw. abzunehmen)." },
+          { t: "Long Call", d: "Recht zu kaufen. Gewinn wenn Kurs steigt. Max. Verlust = Optionsprämie. *(Erwartung: Kurs steigt)*" },
+          { t: "Long Put", d: "Recht zu verkaufen. Gewinn wenn Kurs fällt. Max. Verlust = Prämie. *(Erwartung: Kurs fällt — auch zur Absicherung eines Aktiendepots)*" },
+          { t: "Short Call (Stillhalter)", d: "Pflicht zu liefern wenn Käufer ausübt. **Theoretisch unbegrenzter Verlust** (Kurs kann beliebig steigen). Gewinn = nur die Prämie." },
+          { t: "Short Put (Stillhalter)", d: "Pflicht abzunehmen wenn Käufer ausübt. Max. Verlust = Basispreis × Stück (bis 0). Gewinn = nur die Prämie." },
+        ],
+      },
+      {
+        h: "Optionen — Begriffe",
+        items: [
+          { t: "Basispreis (Strike)", d: "Vereinbarter Kauf- bzw. Verkaufspreis des Basiswerts." },
+          { t: "Optionsprämie", d: "Preis der Option = **innerer Wert** + **Zeitwert**. Innerer Wert = Vorteil bei sofortiger Ausübung. Zeitwert = Aufschlag fürs Restlaufzeit-Potenzial, geht zum Verfall auf 0." },
+          { t: "In/At/Out of the money", d: "**ITM** = Ausübung wäre profitabel (innerer Wert > 0). **ATM** = Strike ≈ Kurs. **OTM** = Ausübung wäre unrentabel (innerer Wert = 0)." },
+          { t: "Amerikanisch vs. Europäisch", d: "**Amerikanisch** = jederzeit während Laufzeit ausübbar. **Europäisch** = nur am Verfallstag. *(Hat nichts mit dem Kontinent zu tun.)*" },
+          { t: "Erfüllung", d: "**Physisch** (Lieferung des Basiswerts) oder **Cash Settlement** (Barausgleich der Differenz, z.B. bei Index-Optionen)." },
+        ],
+      },
+      {
+        h: "Futures",
+        items: [
+          { t: "Definition", d: "Standardisierter, **börsengehandelter** Terminkontrakt. Beide Seiten verpflichtet. Bei Verfall: Lieferung oder Cash Settlement." },
+          { t: "Beispiele Deutschland", d: "**FDAX** = DAX-Future (Eurex). **FGBL** = Bund-Future. Stoxx-, Bobl-, Schatz-Future." },
+          { t: "Margin", d: "**Initial Margin** = Sicherheitsleistung bei Kontraktabschluss (5-15 %). **Variation Margin** = Nachschuss bei Verlust. *(Margin Call → wenn nicht aufgefüllt, Zwangsglattstellung.)*" },
+          { t: "Daily Settlement (Mark-to-Market)", d: "Gewinne und Verluste werden **täglich** gutgeschrieben/belastet — nicht erst am Verfall. Vorteil: kein Kontrahentenrisiko-Stau." },
+        ],
+      },
+      {
+        h: "Forwards & Swaps",
+        items: [
+          { t: "Forward", d: "**OTC**-Variante des Futures. Individuell verhandelt, kein Margin, kein Daily Settlement. **Kontrahentenrisiko** vorhanden. Häufig im Devisenbereich (FX-Forward zur Wechselkursabsicherung)." },
+          { t: "Swap (allgemein)", d: "Tausch von Zahlungsströmen über eine Laufzeit, auf gleichen Nennbetrag." },
+          { t: "Zinsswap (IRS)", d: "Eine Seite zahlt **fixen** Zinssatz, andere zahlt **variablen** (z.B. Euribor). *(Zinsabsicherung variabler Kredite)*" },
+          { t: "Währungsswap", d: "Tausch von Zinszahlungen + Nominal in zwei verschiedenen Währungen." },
+          { t: "Credit Default Swap (CDS)", d: "Versicherung gegen Zahlungsausfall eines Schuldners. Käufer zahlt Prämie, Verkäufer übernimmt im Schadensfall." },
+        ],
+      },
+      {
+        h: "Verbriefte Derivate — Privatkundenmarkt",
+        items: [
+          { t: "Optionsschein (Warrant)", d: "Verbriefte Option, **von einer Bank emittiert** (Bank = Stillhalter). Kleinere Stückelung als Eurex-Option, deshalb für Privatanleger. Hebel + Emittentenrisiko." },
+          { t: "Knock-Out-Zertifikat / Mini-Future", d: "Verfällt **wertlos**, sobald der Kurs eine Knock-Out-Schwelle berührt. Sehr hoher Hebel, sehr hohes Risiko." },
+          { t: "Discount-Zertifikat", d: "Basiswert mit Rabatt kaufen, dafür Gewinnobergrenze (Cap). *(seitwärts/leicht steigender Markt)*" },
+          { t: "Bonus-Zertifikat", d: "Bonuszahlung wenn der Kurs während Laufzeit eine Barriere nicht berührt. Sonst wie Direktinvestment in den Basiswert." },
+          { t: "Index-Zertifikat", d: "Bildet 1:1 einen Index nach (z.B. DAX). Einfacher als ETF — aber **Emittentenrisiko** (kein Sondervermögen!)." },
+          { t: "Garantie-Zertifikat", d: "Kapitalschutz am Laufzeitende (z.B. 100 % Rückzahlung garantiert), dafür niedrigere Renditechance." },
+        ],
+      },
+      {
+        h: "Risiken",
+        items: [
+          { t: "Hebelwirkung", d: "Verlust kann den Einsatz übersteigen (Futures, Stillhalter) oder Totalverlust (Optionen, KO-Zertifikate)." },
+          { t: "Emittentenrisiko", d: "Zertifikate + Optionsscheine sind **Inhaberschuldverschreibungen** der emittierenden Bank — geht die pleite, Geld weg. *(Beispiel: Lehman 2008)*" },
+          { t: "Kontrahentenrisiko", d: "Bei OTC-Geschäften kann die Gegenseite ausfallen. Bei Börse fast 0 wegen Clearingstelle." },
+          { t: "Marktrisiko", d: "Basiswert läuft gegen die Position. Bei Short Call theoretisch unbegrenzt." },
+          { t: "Liquiditätsrisiko", d: "Nicht jedes Derivat lässt sich jederzeit zum fairen Preis schließen." },
+        ],
+      },
+      {
+        h: "Beratung & MiFID II",
+        items: [
+          { t: "Geeignetheitsprüfung", d: "Vor Empfehlung: **Kenntnisse, Erfahrung, finanzielle Verhältnisse, Anlageziel** abfragen. *(passt das Produkt zum Kunden?)*" },
+          { t: "Geeignetheitserklärung", d: "Schriftlicher Nachweis vor Abschluss, dass die Empfehlung zum Kunden passt." },
+          { t: "Risikoklasse", d: "Derivate idR höchste Risikoklasse (z.B. 5 von 5 / „spekulativ"). Kunde muss entsprechend eingestuft sein." },
+          { t: "PRIIP-KID", d: "Basisinformationsblatt — muss bei verpackten Produkten (Zertifikate, Optionsscheine) **vor** dem Kauf ausgehändigt werden." },
+        ],
+      },
+    ],
+  },
 ];
 
 
@@ -1228,7 +1325,7 @@ const HUMINFO_TOPICS = [
 
 
 const SUBJECTS = {
-  bfk1: { name: "BFK 1", short: "I", teacher: "Müller", topics: BFK1_TOPICS, categories: ["VWL", "Altersvorsorge", "Versicherung"] },
+  bfk1: { name: "BFK 1", short: "I", teacher: "Müller", topics: BFK1_TOPICS, categories: ["VWL", "Geldanlage", "Altersvorsorge", "Versicherung"] },
   bfk2: { name: "BFK 2", short: "II", teacher: "Holder", topics: HUMINFO_TOPICS, categories: ["Hints", "Grundlagen", "Kreditarten", "Kreditprüfung", "Recht", "Bilanz", "Kennziffern", "Rechnen", "Sicherheiten", "Überwachung", "Checkliste"] },
 };
 

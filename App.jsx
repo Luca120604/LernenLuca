@@ -12,7 +12,7 @@ const SUBJECTS = {
     short: "I",
     teacher: "Müller",
     topics: BFK1_TOPICS,
-    categories: ["VWL", "Altersvorsorge", "Versicherung"],
+    categories: ["VWL", "Geldanlage", "Altersvorsorge", "Versicherung"],
   },
   bfk2: {
     name: "BFK 2",
